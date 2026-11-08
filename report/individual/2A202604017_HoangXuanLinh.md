@@ -16,39 +16,23 @@
 
 ## 2. Kết quả chính
 
-                                 precision  recall  F1 (test)  F1 (SUB 40)  \
-1. BoW + LogReg (tự code)            0.988   0.845      0.911        0.974   
-2. BoW + MLP (deep learning)         0.967   0.897      0.930        1.000   
-3a. Encoder (MiniLM) + kNN           0.862   0.969      0.913        0.976   
-3b. Encoder (MiniLM) + LogReg        0.949   0.969      0.959        0.976   
-3c. Encoder (MiniLM) + MLP head      0.989   0.969      0.979        0.976   
-4a. LLM nhỏ zero-shot                0.905   0.950      0.927        0.927   
-4b. LLM lớn zero-shot                1.000   1.000      1.000        1.000   
-4c. LLM nhỏ few-shot                 1.000   1.000      1.000        1.000   
+## Bảng so sánh các phương pháp
 
-                                 train (s)  tin/s (cả lô)  p50 ms/tin  \
-1. BoW + LogReg (tự code)            4.964      14293.130       0.040   
-2. BoW + MLP (deep learning)        14.936      37512.651       0.158   
-3a. Encoder (MiniLM) + kNN          66.689         35.196      25.296   
-3b. Encoder (MiniLM) + LogReg       66.862         45.976      19.850   
-3c. Encoder (MiniLM) + MLP head     67.336         46.933      19.839   
-4a. LLM nhỏ zero-shot                0.000          1.125     786.403   
-4b. LLM lớn zero-shot                0.000          1.050     912.016   
-4c. LLM nhỏ few-shot                 0.000          1.261     760.770   
+| Phương pháp | Precision | Recall | F1 (test) | F1 (SUB 40) | Train (s) | Tin/s (cả lô) | p50 (ms/tin) | p95 (ms/tin) | USD / 1k tin |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1. BoW + LogReg (tự code) | 0.988 | 0.845 | 0.911 | 0.974 | 4.964 | 14,293.130 | 0.040 | 0.115 | 0.000 |
+| 2. BoW + MLP (deep learning) | 0.967 | 0.897 | 0.930 | 1.000 | 14.936 | 37,512.651 | 0.158 | 0.192 | 0.000 |
+| 3a. Encoder (MiniLM) + kNN | 0.862 | 0.969 | 0.913 | 0.976 | 66.689 | 35.196 | 25.296 | 34.951 | 0.000 |
+| 3b. Encoder (MiniLM) + LogReg | 0.949 | 0.969 | 0.959 | 0.976 | 66.862 | 45.976 | 19.850 | 26.559 | 0.000 |
+| 3c. Encoder (MiniLM) + MLP head | 0.989 | 0.969 | 0.979 | 0.976 | 67.336 | 46.933 | 19.839 | 28.846 | 0.000 |
+| 4a. LLM nhỏ zero-shot | 0.905 | 0.950 | 0.927 | 0.927 | 0.000 | 1.125 | 786.403 | 1,807.615 | 0.006 |
+| 4b. LLM lớn zero-shot | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | 1.050 | 912.016 | 1,143.494 | 0.057 |
+| 4c. LLM nhỏ few-shot | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | 1.261 | 760.770 | 1,129.564 | 0.015 |
 
-                                 p95 ms/tin  USD / 1k tin  
-1. BoW + LogReg (tự code)             0.115         0.000  
-2. BoW + MLP (deep learning)          0.192         0.000  
-3a. Encoder (MiniLM) + kNN           34.951         0.000  
-3b. Encoder (MiniLM) + LogReg        26.559         0.000  
-3c. Encoder (MiniLM) + MLP head      28.846         0.000  
-4a. LLM nhỏ zero-shot              1807.615         0.006  
-4b. LLM lớn zero-shot              1143.494         0.057  
-4c. LLM nhỏ few-shot               1129.564         0.015  
-• Hàng LLM chỉ đo trên SUB (40 tin) → so sánh chất lượng công bằng bằng cột 'F1 (SUB 40)'.
-• SUB chỉ 40 tin: 1 tin sai đổi F1 vài điểm. Chênh < ~0.05 F1 coi như HOÀ — đừng xếp hạng theo số lẻ.
-• Inference đo TỪ VĂN BẢN THÔ → NHÃN (gồm cả vectorize / encode). p50/p95 = gọi từng tin một, như một request thật.
-• train (s) của 3a/3b/3c = thời gian encoder MiniLM encode tập train (+ train đầu LogReg / MLP); LLM = 0 vì không train. Số đo phụ thuộc CPU/GPU của Colab.
+- Hàng LLM chỉ đo trên SUB (40 tin), vì vậy so sánh chất lượng công bằng bằng cột **F1 (SUB 40)**.
+- SUB chỉ có 40 tin: một tin dự đoán sai có thể làm F1 thay đổi vài điểm. Chênh lệch dưới khoảng 0.05 F1 nên xem là tương đương, không nên xếp hạng theo số lẻ.
+- Inference được đo từ **văn bản thô đến nhãn**, bao gồm cả vectorize/encode. p50/p95 là độ trễ khi gọi từng tin một, tương tự một request thực tế.
+- `Train (s)` của 3a/3b/3c bao gồm thời gian MiniLM encode tập train và huấn luyện đầu LogReg/MLP. LLM có thời gian train bằng 0 vì không fine-tune trên dataset.Số đo phụ thuộc vào CPU/GPU và môi trường Colab.
 
 ## 3. Dự đoán và thực tế
 
@@ -66,10 +50,13 @@ BoW suy giảm nhiều nhất: LogReg chỉ đạt 50%, MLP đạt 52%. Hai nhó
 ## 5. Thử thách cá nhân
 
 Đề #3: DL · Đổi lớp ẩn MLP thành 4 và 512 nơ-ron. Báo số tham số, F1 test, thời gian train. Khi nào nên chọn mạng nhỏ?
+
 Cách làm: Sử dụng lại kiến trúc MLP và hàm huấn luyện có sẵn. Lần lượt thay hidden bằng 4 và 512, huấn luyện 30 epochs và đánh giá bằng F1 trên tập test.
+
 Kết quả:
 {'Hidden': 4, 'F1 Test': np.float64(0.941), 'Train Time (s)': 1.413}
 {'Hidden': 512, 'F1 Test': np.float64(0.926), 'Train Time (s)': 14.44}
+
 Giải thích: Mạng 4 neuron đạt F1 cao hơn và train nhanh hơn khoảng 10 lần. Trong thí nghiệm này, tăng số neuron không giúp cải thiện hiệu quả mà còn làm tăng chi phí tính toán. Vì vậy, nên ưu tiên mạng nhỏ khi dữ liệu và bài toán không quá phức tạp, hoặc khi cần tiết kiệm tài nguyên và thời gian.
 
 ## 6. Phương án cho sản phẩm thật
